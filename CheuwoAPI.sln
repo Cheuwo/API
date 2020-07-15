@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheuwoAPI", "CheuwoAPI\CheuwoAPI.csproj", "{F7580EE9-4C57-4B32-AA6B-136C1473144F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F7580EE9-4C57-4B32-AA6B-136C1473144F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7580EE9-4C57-4B32-AA6B-136C1473144F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7580EE9-4C57-4B32-AA6B-136C1473144F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7580EE9-4C57-4B32-AA6B-136C1473144F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4E164155-2C61-4278-8B7E-4A104D85EF87}
+	EndGlobalSection
+EndGlobal
