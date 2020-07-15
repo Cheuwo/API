@@ -9,7 +9,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CheuwoAPI.Controllers
 {
@@ -21,8 +20,7 @@ namespace CheuwoAPI.Controllers
         private readonly IConfiguration _config;
         private List<User> appUsers = new List<User>
         {
-            new User { UserName = "admin", Password = "1234" },
-            new User { UserName = "user", Password = "1234" }
+            new User { Email = "admin@cheuwo.com", Password = "1234" }
         };
 
         public UsersController(IConfiguration config)
@@ -49,7 +47,7 @@ namespace CheuwoAPI.Controllers
 
         User AuthenticateUser(User loginCredentials)
         {
-            User user = appUsers.SingleOrDefault(x => x.UserName == loginCredentials.UserName && x.Password == loginCredentials.Password);
+            User user = appUsers.SingleOrDefault(x => x.Email == loginCredentials.Email && x.Password == loginCredentials.Password);
             return user;
         }
         string GenerateJWTToken(User userInfo)
@@ -58,7 +56,7 @@ namespace CheuwoAPI.Controllers
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userInfo.UserName),
+                new Claim(JwtRegisteredClaimNames.Sub, userInfo.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
             var token = new JwtSecurityToken(
