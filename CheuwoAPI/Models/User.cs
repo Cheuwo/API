@@ -1,8 +1,9 @@
-﻿namespace CheuwoAPI.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace CheuwoAPI.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+
     }
 }
