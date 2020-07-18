@@ -16,7 +16,7 @@ namespace CheuwoAPI.Controllers
     [Route("api/v1/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class UsersController : ControllerBase
+    public class UsersController : ApiHandler
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
@@ -41,7 +41,7 @@ namespace CheuwoAPI.Controllers
             var user = new User { UserName = model.Email, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return BadRequest(result.Errors.First().Description);
+                return ApiBadRequest(result.Errors.First().Description);
 
             return Created("", new
             {
@@ -58,14 +58,14 @@ namespace CheuwoAPI.Controllers
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
-                return BadRequest("User does not exist.");
+                return ApiBadRequest("User does not exist.");
 
             var result = await _signInManager.PasswordSignInAsync(user.Email, model.Password, false, lockoutOnFailure: false);
             if (result.IsLockedOut)
-                return BadRequest("User account locked out.");
+                return ApiBadRequest("User account locked out.");
 
             if (!result.Succeeded)
-                return BadRequest("Invalid username or password.");
+                return ApiBadRequest("Invalid username or password.");
 
             return Ok(new
             {
