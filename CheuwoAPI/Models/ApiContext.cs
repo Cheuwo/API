@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using CheuwoAPI.Models;
 
 namespace CheuwoAPI.Models
 {
@@ -14,5 +15,7 @@ namespace CheuwoAPI.Models
         {
             base.OnModelCreating(builder);
         }
+
+        public DbSet<CheuwoAPI.Models.Offer> Offer { get; set; }
     }
 }
