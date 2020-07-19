@@ -1,5 +1,4 @@
 ﻿using CheuwoAPI.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +14,6 @@ namespace CheuwoAPI.Controllers
 {
     [Route("api/v1/[controller]/[action]")]
     [ApiController]
-    [Authorize]
     public class UsersController : ApiHandler
     {
         private readonly UserManager<User> _userManager;
@@ -35,7 +33,6 @@ namespace CheuwoAPI.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> Register(UserDTO model)
         {
             var user = new User { UserName = model.Email, Email = model.Email };
@@ -53,7 +50,6 @@ namespace CheuwoAPI.Controllers
         }
 
         [HttpPost]
-        [AllowAnonymous]
         public async Task<IActionResult> Login(UserDTO model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -82,7 +78,7 @@ namespace CheuwoAPI.Controllers
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userInfo.Email),
+                new Claim(JwtRegisteredClaimNames.Email, userInfo.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
             var token = new JwtSecurityToken(
