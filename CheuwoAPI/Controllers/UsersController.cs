@@ -1,58 +1,84 @@
 ﻿using CheuwoAPI.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CheuwoAPI.Controllers
 {
     [Route("api/v1/[controller]/[action]")]
     [ApiController]
     [Authorize]
-    public class UsersController : ControllerBase
+    public class UsersController : ApiHandler
     {
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _config;
-        private List<User> appUsers = new List<User>
-        {
-            new User { Email = "admin@cheuwo.com", Password = "1234" }
-        };
 
-        public UsersController(IConfiguration config)
+
+        public UsersController(
+            IConfiguration config,
+            UserManager<User> userManager,
+            SignInManager<User> signInManager
+            )
         {
             _config = config;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         [HttpPost]
         [AllowAnonymous]
-        public IActionResult Login([FromBody]User login)
+        public async Task<IActionResult> Register(UserDTO model)
         {
-            IActionResult response = Unauthorized();
-            User user = AuthenticateUser(login);
-            if (user != null)
+            var user = new User { UserName = model.Email, Email = model.Email };
+            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!result.Succeeded)
+                return ApiBadRequest(result.Errors.First().Description);
+
+            return Created("", new
             {
-                var tokenString = GenerateJWTToken(user);
-                response = Ok(new
+                token = GenerateJWTToken(new UserDTO()
                 {
-                    token = tokenString
-                });
-            }
-            return response;
+                    Email = user.Email
+                })
+            });
         }
 
-        User AuthenticateUser(User loginCredentials)
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(UserDTO model)
         {
-            User user = appUsers.SingleOrDefault(x => x.Email == loginCredentials.Email && x.Password == loginCredentials.Password);
-            return user;
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+                return ApiBadRequest("User does not exist.");
+
+            var result = await _signInManager.PasswordSignInAsync(user.Email, model.Password, false, lockoutOnFailure: false);
+            if (result.IsLockedOut)
+                return ApiBadRequest("User account locked out.");
+
+            if (!result.Succeeded)
+                return ApiBadRequest("Invalid username or password.");
+
+            return Ok(new
+            {
+                token = GenerateJWTToken(new UserDTO()
+                {
+                    Email = user.Email
+                })
+            });
         }
-        string GenerateJWTToken(User userInfo)
+
+        string GenerateJWTToken(UserDTO userInfo)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt: SecretKey"]));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWTSecretKey"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
             var claims = new[]
             {
@@ -60,8 +86,8 @@ namespace CheuwoAPI.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
             var token = new JwtSecurityToken(
-            issuer: _config["Jwt: Issuer"],
-            audience: _config["Jwt: Audience"],
+            issuer: _config["JWTIssuer"],
+            audience: _config["JWTAudience"],
             claims: claims,
             expires: DateTime.Now.AddDays(30),
             signingCredentials: credentials
