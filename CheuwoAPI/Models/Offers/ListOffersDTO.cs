@@ -4,5 +4,10 @@
     {
         public int Count { get; set; }
         public int Offset { get; set; }
+
+        public ListOffersDTO()
+        {
+            Count = 10;
+        }
     }
 }
