@@ -1,7 +1,6 @@
 using System;
-using System.Text;
+using CheuwoAPI.Helpers;
 using CheuwoAPI.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -9,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 
 namespace CheuwoAPI
 {
@@ -25,6 +23,8 @@ namespace CheuwoAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+
             string strCon = Configuration["ConnectionString"];
             services.AddDbContext<ApiContext>(options =>
                 options.UseSqlServer(strCon));
@@ -65,26 +65,6 @@ namespace CheuwoAPI
                 options.SlidingExpiration = true;
             });
 
-            services.AddAuthorization();
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = Configuration["JWTIssuer"],
-                    ValidAudience = Configuration["JWTAudience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWTSecretKey"])),
-                    ClockSkew = TimeSpan.Zero
-                };
-            });
-
             services.AddControllers();
         }
 
@@ -100,9 +80,13 @@ namespace CheuwoAPI
 
             app.UseRouting();
 
-            app.UseAuthentication();
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
 
-            app.UseAuthorization();
+            app.UseMiddleware<JwtMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
