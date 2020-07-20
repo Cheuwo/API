@@ -50,7 +50,7 @@ namespace CheuwoAPI.Helpers
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
-                var userEmail = jwtToken.Claims.First(x => x.Type == "sub").Value;
+                var userEmail = jwtToken.Claims.First(x => x.Type == "email").Value;
 
                 // attach user to context on successful jwt validation
                 context.Items["User"] = await userManager.FindByEmailAsync(userEmail);
