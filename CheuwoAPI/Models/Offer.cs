@@ -10,7 +10,7 @@ namespace CheuwoAPI.Models
 
         [Required]
         [JsonIgnore]
-        public User Creator { get; set; }
+        public virtual User Creator { get; set; }
 
         [Required]
         public string Name { get; set; }
