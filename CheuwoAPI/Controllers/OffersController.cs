@@ -94,7 +94,8 @@ namespace CheuwoAPI.Controllers
         public async Task<ActionResult<Offer>> PostOffer(CreateOfferDTO model)
         {
             var user = (User) HttpContext.Items["User"];
-            var offer = new Offer { Creator = user, Description = model.Description, Price = model.Price, Rating = model.Rating };
+            var offer = new Offer { Creator = user, Name = model.Name, Address = model.Address, 
+                Description = model.Description, Price = model.Price, Rating = model.Rating };
 
             _context.Offer.Add(offer);
             await _context.SaveChangesAsync();
