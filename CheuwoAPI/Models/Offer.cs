@@ -12,6 +12,12 @@ namespace CheuwoAPI.Models
         [JsonIgnore]
         public User Creator { get; set; }
 
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string Address { get; set; }
+
         public string Description { get; set; }
 
         public float Rating { get; set; }

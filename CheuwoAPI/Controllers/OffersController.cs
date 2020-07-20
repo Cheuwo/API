@@ -11,7 +11,7 @@ namespace CheuwoAPI.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class OffersController : ControllerBase
+    public class OffersController : ApiHandler
     {
         private readonly ApiContext _context;
 
@@ -25,11 +25,15 @@ namespace CheuwoAPI.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<OfferDTO>>> GetOffer(ListOffersDTO model)
         {
+            if (model.Count <= 0)
+                return ApiBadRequest("Invalid count specified");
+
             var dispOffers = new List<OfferDTO>();
-            var offers = await _context.Offer.Skip(model.Offset).Take(model.Count).ToListAsync();
+            var offers = await (model.Offset > 0 ? _context.Offer.Skip(model.Offset).Take(model.Count).ToListAsync() :
+                _context.Offer.Take(model.Count).ToListAsync());
             foreach(Offer offer in offers)
             {
-                dispOffers.Add(new OfferDTO { ID = offer.ID, CreatorEmail = offer.Creator.Email, Description = offer.Description, Rating = offer.Rating, Price = offer.Price });
+                dispOffers.Add(GetOfferDTO(offer));
             }
             return dispOffers;
         }
@@ -46,7 +50,7 @@ namespace CheuwoAPI.Controllers
                 return NotFound();
             }
 
-            return new OfferDTO { ID = offer.ID, CreatorEmail = offer.Creator.Email, Description = offer.Description, Rating = offer.Rating, Price = offer.Price };
+            return GetOfferDTO(offer);
         }
 
         // PUT: api/Offers/5
@@ -95,8 +99,7 @@ namespace CheuwoAPI.Controllers
             _context.Offer.Add(offer);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetOffer", new { id = offer.ID }, 
-                new OfferDTO { ID = offer.ID, CreatorEmail = offer.Creator.Email, Description = offer.Description, Rating = offer.Rating, Price = offer.Price });
+            return CreatedAtAction("GetOffer", new { id = offer.ID }, GetOfferDTO(offer));
         }
 
         // DELETE: api/Offers/5
@@ -113,12 +116,17 @@ namespace CheuwoAPI.Controllers
             _context.Offer.Remove(offer);
             await _context.SaveChangesAsync();
 
-            return new OfferDTO { ID = offer.ID, CreatorEmail = offer.Creator.Email, Description = offer.Description, Rating = offer.Rating, Price = offer.Price };
+            return GetOfferDTO(offer);
         }
 
         private bool OfferExists(int id)
         {
             return _context.Offer.Any(e => e.ID == id);
         }
+
+        private OfferDTO GetOfferDTO(Offer offer)
+            => new OfferDTO { ID = offer.ID, CreatorEmail = offer.Creator.Email,
+                Name = offer.Name, Address = offer.Address, Description = offer.Description,
+                Rating = offer.Rating, Price = offer.Price };
     }
 }
