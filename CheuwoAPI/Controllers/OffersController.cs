@@ -29,8 +29,8 @@ namespace CheuwoAPI.Controllers
                 return ApiBadRequest("Invalid count specified");
 
             var dispOffers = new List<OfferDTO>();
-            var offers = await (model.Offset > 0 ? _context.Offer.Skip(model.Offset).Take(model.Count).ToListAsync() :
-                _context.Offer.Take(model.Count).ToListAsync());
+            var offers = await (model.Offset > 0 ? _context.Offer.Include(i => i.Creator).Skip(model.Offset).Take(model.Count).ToListAsync() :
+                _context.Offer.Include(i => i.Creator).Take(model.Count).ToListAsync());
             foreach(Offer offer in offers)
             {
                 dispOffers.Add(GetOfferDTO(offer));
@@ -43,7 +43,7 @@ namespace CheuwoAPI.Controllers
         [Authorize]
         public async Task<ActionResult<OfferDTO>> GetOffer(int id)
         {
-            var offer = await _context.Offer.FindAsync(id);
+            var offer = await _context.Offer.Include(i => i.Creator).FirstOrDefaultAsync(i => i.ID == id);
 
             if (offer == null)
             {
@@ -108,7 +108,7 @@ namespace CheuwoAPI.Controllers
         [Authorize]
         public async Task<ActionResult<OfferDTO>> DeleteOffer(int id)
         {
-            var offer = await _context.Offer.FindAsync(id);
+            var offer = await _context.Offer.Include(i => i.Creator).FirstOrDefaultAsync(i => i.ID == id);
             if (offer == null)
             {
                 return NotFound();
